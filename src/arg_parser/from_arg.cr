@@ -123,3 +123,24 @@ struct UUID
     UUID.new(arg)
   end
 end
+
+struct Nil
+  def self.from_arg(arg : String)
+    nil
+  end
+end
+
+def Union.from_arg(arg : String)
+  {% begin %}
+    {% for type in T %}
+      begin
+        %val = {{type}}.from_arg(arg)
+        return %val if %val.is_a?({{type}})
+      rescue
+      end
+
+    {% end %}
+
+    raise ArgParser::Error.new("Argument '#{arg}' cannot be converted to any of the union types: {{T}}")
+  {% end %}
+end

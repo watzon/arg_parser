@@ -187,7 +187,7 @@ module ArgParser
   #
   # Note: You can override this method to change the way validation errors are handled.
   def on_validation_error(key : String, value, errors : Array(String))
-    add_validation_error(key, erorrs)
+    add_validation_error(key, errors)
     raise ValidationError.new(key, value, errors)
   end
 
@@ -198,9 +198,9 @@ module ArgParser
     raise ConversionError.new(key, value, type)
   end
 
-  def add_validation_error(key : String, value, errors : Array(String))
-    @errors[key] ||= [] of String
-    @errors[key].concat errors
+  def add_validation_error(key : String, errors : Array(String))
+    @_validation_errors[key] ||= [] of String
+    @_validation_errors[key].concat errors
   end
 
   # https://en.wikipedia.org/wiki/Quotation_mark#Summary_table
