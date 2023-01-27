@@ -18,8 +18,9 @@ module ArgParser
   end
 
   class ValidationError < Error
-    def initialize(name, errors)
-      super("Validation failed for #{name}: #{errors.join(", ")}")
+    def initialize(name, value, errors)
+      super("Validation failed for field :#{name} with value #{value.inspect}:\n" +
+            errors.map { |e| "  - #{e}" }.join("\n"))
     end
   end
 

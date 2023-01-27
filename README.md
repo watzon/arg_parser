@@ -155,10 +155,10 @@ args._validation_errors # => {"age" => ["must be an integer"]}
 
 ArgParser is designed to be configurable so it can handle a wide variety of use cases. As such, it includes several overridable methods which can be used to modify its behavior. These are:
 
-- `on_validation_error` - called when a validation error occurs
-- `on_unknown_attribute` - called when an unknown attribute is encountered
-- `on_missing_attribute` - called when a required attribute is missing
-- `on_conversion_error` - called when a value isn't able to be converted to the specified type
+- `on_validation_error` - called when a validation error occurs; by default calls `add_validation_error` and then raises `ArgParser::ValidationError`
+- `on_unknown_attribute` - called when an unknown attribute is encountered; by default raises `ArgParser::UnknownAttributeError`
+- `on_missing_attribute` - called when a required attribute is missing; by default raises `ArgParser::MissingAttributeError`
+- `on_conversion_error` - called when a value isn't able to be converted to the specified type; by default raises `ArgParser::ConversionError`
 
 In addition, the way keys are parsed can be modified by overriding the `parse_key` method. By default, it simply removes one or two dashes from the beginning of the key. For example, `--name` becomes `name`, and `-n` becomes `n`.
 

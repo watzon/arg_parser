@@ -84,7 +84,7 @@ module ArgParser
               {% elsif value[:type] < Array %}
                 %var{name} ||= [] of {{value[:type].type_vars[0]}}
                 {% if value[:converter] %}
-                  %var{name} << {{ value[:converter] }}.from_arg(value)
+                  %var{name}.concat {{ value[:converter] }}.from_arg(value)
                 {% else %}
                   %var{name} << ::Union({{value[:type].type_vars[0]}}).from_arg(value)
                 {% end %}
@@ -146,8 +146,6 @@ module ArgParser
 
           %validator{name} = {{ validator.name(generic_args: false) }}.new({{ args.join(", ").id }})
           if %found{name} && !%validator{name}.validate({{name.id.stringify}}, @{{name}})
-              @_validation_errors[{{name.stringify}}] ||= [] of String
-              @_validation_errors[{{name.stringify}}] += %validator{name}.errors
             on_validation_error({{name.stringify}}, @{{name}}, %validator{name}.errors)
           end
         {% end %}
@@ -189,7 +187,8 @@ module ArgParser
   #
   # Note: You can override this method to change the way validation errors are handled.
   def on_validation_error(key : String, value, errors : Array(String))
-    raise ValidationError.new(key, errors)
+    add_validation_error(key, erorrs)
+    raise ValidationError.new(key, value, errors)
   end
 
   # Called when a value cannot be converted to the expected type.
@@ -197,6 +196,11 @@ module ArgParser
   # Note: You can override this method to change the way conversion errors are handled.
   def on_conversion_error(key : String, value : String, type)
     raise ConversionError.new(key, value, type)
+  end
+
+  def add_validation_error(key : String, value, errors : Array(String))
+    @errors[key] ||= [] of String
+    @errors[key].concat errors
   end
 
   # https://en.wikipedia.org/wiki/Quotation_mark#Summary_table
