@@ -1,0 +1,14 @@
+name: arg_parser
+version: 0.1.0
+
+authors:
+  - Chris Watson <cawatson1993@gmail.com>
+
+development_dependencies:
+  spectator:
+    gitlab: arctic-fox/spectator
+    branch: master
+
+crystal: 1.7.1
+
+license: MIT
