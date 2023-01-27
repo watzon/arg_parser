@@ -1,5 +1,7 @@
 # ArgParser
 
+[![Tests](https://github.com/watzon/arg_parser/actions/workflows/crystal.yml/badge.svg)](https://github.com/watzon/arg_parser/actions/workflows/crystal.yml) 
+
 A powerful argument parser which uses a class or struct to define the arguments and their types.
 
 ## Installation
