@@ -133,14 +133,19 @@ end
 def Union.from_arg(arg : String)
   {% begin %}
     {% for type in T %}
-      begin
-        %val = {{type}}.from_arg(arg)
-        return %val if %val.is_a?({{type}})
-      rescue
-      end
-
+      {% if type != Nil %}
+        begin
+          %val = {{type}}.from_arg(arg)
+          return %val if %val.is_a?({{type}})
+        rescue
+        end
+      {% end %}
     {% end %}
 
-    raise ArgParser::Error.new("Argument '#{arg}' cannot be converted to any of the union types: {{T}}")
+    {% if T.includes?(Nil) %}
+      nil
+    {% else %}
+      raise ArgParser::Error.new("Argument '#{arg}' cannot be converted to any of the union types: {{T}}")
+    {% end %}
   {% end %}
 end

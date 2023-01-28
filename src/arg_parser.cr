@@ -65,34 +65,33 @@ module ArgParser
       i = 0
       while !%args.empty?
         arg = %args.shift
-        key = parse_key(arg)
-        next unless key
+        next unless key = parse_key(arg)
 
-        value = %args.shift rescue "true"
-        if value.starts_with?("-")
+        value = %args.shift rescue nil
+        if value && parse_key(value)
           %args.unshift(value)
           value = "true"
         end
+
+        next unless value
 
         case key
         {% for name, value in properties %}
           when {{ value[:key].id.stringify }}{% if value[:alias] %}, {{ value[:alias].id.stringify }}{% end %}
             %found{name} = true
             begin
-              {% if value[:type] == String %}
-                %var{name} = value
-              {% elsif value[:type] < Array %}
+              {% if value[:type] < Array %}
                 %var{name} ||= [] of {{value[:type].type_vars[0]}}
                 {% if value[:converter] %}
                   %var{name}.concat {{ value[:converter] }}.from_arg(value)
                 {% else %}
-                  %var{name} << ::Union({{value[:type].type_vars[0]}}).from_arg(value)
+                  %var{name} << {{value[:type].type_vars[0]}}.from_arg(value)
                 {% end %}
               {% else %}
                 {% if value[:converter] %}
                   %var{name} = {{ value[:converter] }}.from_arg(value)
                 {% else %}
-                  %var{name} = ::Union({{value[:type]}}).from_arg(value)
+                  %var{name} = {{value[:type]}}.from_arg(value)
                 {% end %}
               {% end %}
             rescue
@@ -106,7 +105,7 @@ module ArgParser
 
       {% for name, value in properties %}
         {% unless value[:nilable] || value[:has_default] %}
-          if %var{name}.nil? && !%found{name} && !::Union({{value[:type]}}).nilable?
+          if %var{name}.nil? && !%found{name} && !{{value[:type]}}.nilable?
             on_missing_attribute({{value[:key].id.stringify}})
           end
         {% end %}
@@ -145,8 +144,8 @@ module ArgParser
           {% end %}
 
           %validator{name} = {{ validator.name(generic_args: false) }}.new({{ args.join(", ").id }})
-          if %found{name} && !%validator{name}.validate({{name.id.stringify}}, @{{name}})
-            on_validation_error({{name.stringify}}, @{{name}}, %validator{name}.errors)
+          if %found{name} && !%var{name}.nil? && !%validator{name}.validate({{name.id.stringify}}, %var{name})
+            on_validation_error({{name.stringify}}, %var{name}, %validator{name}.errors)
           end
         {% end %}
       {% end %}
@@ -154,8 +153,10 @@ module ArgParser
   end
 
   # Parse the argument key.
-  # Standard arg names start with a `--`
-  # Aliases start with a single `-`
+  # Standard arg names start with a `--.
+  # Aliases start with a single `-`.
+  #
+  # Arguments without a value become boolean true values.
   #
   # Note: You can override this method to change the way keys are parsed.
   def parse_key(arg : String) : String?

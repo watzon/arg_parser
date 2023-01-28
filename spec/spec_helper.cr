@@ -44,3 +44,16 @@ struct TestConverters
   @[ArgParser::Field(converter: ArgParser::EnumValueConverter(Color))]
   getter ncolor : Color
 end
+
+struct TestValidators
+  include ArgParser
+
+  @[ArgParser::Validate::Format(/^[a-zA-Z]+$/)]
+  getter first_name : String
+
+  @[ArgParser::Validate::Format(/^[a-zA-Z]+$/)]
+  getter last_name : String?
+
+  @[ArgParser::Validate::InRange(1, 100)]
+  getter age : Int32
+end
