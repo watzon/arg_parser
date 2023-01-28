@@ -67,7 +67,8 @@ module ArgParser
         arg = %args.shift
         next unless key = parse_key(arg)
 
-        value = %args.shift rescue nil
+        # TODO: Find a different way to handle this
+        value = %args.shift rescue "true"
         if value && parse_key(value)
           %args.unshift(value)
           value = "true"
