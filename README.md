@@ -67,7 +67,7 @@ which implements `from_arg` as a proxy for that type.
 
 ## Converters
 
-Converers are simply modules which have a `self.from_arg` method which takes
+Converters are simply modules which have a `self.from_arg` method which takes
 a value string, and returns the converted value. For Example:
 
 ```
